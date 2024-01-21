@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "cry-baby"
+version = "0.1.0"
+description = ""
+authors = ["ericcbonet <ericcbonet@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+hexalog = "^0.6.0"
+pyaudio = "^0.2.14"
+numpy = "^1.26.3"
+librosa = "^0.10.1"
+soundfile = "^0.12.1"
+tflite = "^2.10.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+black = "^23.12.1"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

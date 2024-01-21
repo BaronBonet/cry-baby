@@ -1,0 +1,52 @@
+default_language_version:
+  python: python3.10
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        name: isort
+        args: ["--show-config"]
+
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+        name: black
+        args: ["--config=pyproject.toml" ]
+
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v1.3.3
+    hooks:
+      - id: pycln
+        name: remove unused imports
+        args: [ "--config=pyproject.toml" ]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: '4.0.1'
+    hooks:
+      - id: flake8
+        args: ['--config=.flake8']
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.32.1
+    hooks:
+      - id: pyupgrade
+        args:
+          - --py3-plus
+          - --keep-runtime-typing
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.77.1
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_docs
+      - id: terraform_tflint
