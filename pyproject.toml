@@ -6,13 +6,31 @@ authors = ["ericcbonet <ericcbonet@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10,<3.12"
 hexalog = "^0.6.0"
 pyaudio = "^0.2.14"
 numpy = "^1.26.3"
+keras = "^2.13.0"
 librosa = "^0.10.1"
 soundfile = "^0.12.1"
-tflite = "^2.10.0"
+
+tensorflow-macos = { version = "^2.13.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
+tensorflow = { version = "^2.13.0", platform = "darwin", markers = "platform_machine != 'arm64'"}
+tensorflow-io-gcs-filesystem = { version="^0.34.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
+
+#tensorflow-macos = { version = "^2.13.0", optional = true }
+#tensorflow = { version = "^2.13.0", optional = true }
+#tensorflow-io-gcs-filesystem = {version="^0.34.0", optional = true}
+debugpy = "^1.8.0"
+
+[tool.poetry.extras]
+macos = ["tensorflow-macos", "tensorflow", "tensorflow-io-gcs-filesystem"]
+
+#
+#tensorflow-macos = { version = "^2.13.0", optional = true }
+#
+#[tool.poetry.extras]
+#macos = ["tensorflow", "tensorflow-macos"]
 
 
 [tool.poetry.group.dev.dependencies]
