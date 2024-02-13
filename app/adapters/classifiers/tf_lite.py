@@ -5,9 +5,7 @@ import tflite
 
 from app.core import ports
 from pkg.audio_file_client.core.domain import (
-    MelSpectrogramPreprocessingSettings,
-    UnexpectedDurationError,
-)
+    MelSpectrogramPreprocessingSettings, UnexpectedDurationError)
 from pkg.audio_file_client.core.ports import AudioFileClient
 
 
@@ -29,19 +27,19 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
             mel_spectrogram_preprocessing_settings
         )
 
-    def predict(self, audio_file: pathlib.Path) -> float:
+    def classify(self, audio_file: pathlib.Path) -> float:
         if not audio_file.exists() or not audio_file.is_file():
             raise FileNotFoundError
 
         # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds
         if (
-            self.audio_file_client.get_duration(
+                duration := self.audio_file_client.get_duration(
                 audio_file, self.mel_spectrogram_preprocessing_settings.sampling_rate_hz
             )
             != self.mel_spectrogram_preprocessing_settings.duration_seconds
         ):
             raise UnexpectedDurationError(
-                f"Audio file {audio_file} has duration {self.audio_file_client.get_duration(audio_file)} seconds, "
+                f"Audio file {audio_file} has duration {duration} seconds, "
                 f"but the pre_processing_settings.duration_seconds is"
                 f" {self.mel_spectrogram_preprocessing_settings.duration_seconds}"
             )
