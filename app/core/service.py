@@ -1,8 +1,6 @@
 import hexalog.ports
 
 from app.core import ports
-from pkg.audio_file_client.core.domain import \
-    MelSpectrogramPreprocessingSettings
 
 
 class CryBabyService(ports.Service):
@@ -18,8 +16,6 @@ class CryBabyService(ports.Service):
 
     def evaluate_from_microphone(
         self,
-        recording_rate_khz: int,
-        mel_spectrogram_preprocessing_settings: MelSpectrogramPreprocessingSettings,
     ) -> float:
         """
          Record audio and classify it
@@ -27,10 +23,5 @@ class CryBabyService(ports.Service):
         """
         self.logger.info("Service beginning to evaluate audio from microphone")
         with self.recorder as recorder:
-            audio_file = recorder.record(
-                recording_rate_khz,
-                mel_spectrogram_preprocessing_settings.duration_seconds,
-            )
-        return self.classifier.classify(
-            audio_file, mel_spectrogram_preprocessing_settings
-        )
+            audio_file = recorder.record()
+        return self.classifier.classify(audio_file)

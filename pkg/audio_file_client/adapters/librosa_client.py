@@ -27,15 +27,25 @@ class LibrosaClient(ports.AudioFileClient):
 
         # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds
         if (
-            self.get_duration(audio_file_path, pre_processing_settings.sampling_rate_hz)
-            != pre_processing_settings.duration_seconds
-        ):
+            duration := self.get_duration(
+                path_to_audio_file=audio_file_path,
+                hop_length=pre_processing_settings.hop_length,
+            )
+        ) != pre_processing_settings.duration_seconds:
             raise UnexpectedDurationError(
-                f"Audio file {audio_file_path} has duration {self.get_duration(audio_file_path)} seconds, "
+                f"Audio file {audio_file_path} has duration {duration} seconds, "
                 f"but the pre_processing_settings.duration_seconds is {pre_processing_settings.duration_seconds}"
             )
 
         y, sr = self._load(audio_file_path)
+
+        if sr != pre_processing_settings.sampling_rate_hz:
+            # raise ValueError(
+            print(
+                f"Audio file {audio_file_path} has sampling rate {sr}, "
+                f"but the pre_processing_settings.sampling_rate_hz is {pre_processing_settings.sampling_rate_hz}"
+                "they should be the same"
+            )
 
         mel_spectrogram = melspectrogram(
             y=y,
@@ -43,6 +53,7 @@ class LibrosaClient(ports.AudioFileClient):
             n_mels=pre_processing_settings.number_of_mel_bands,
             hop_length=pre_processing_settings.hop_length,
         )
+        print(mel_spectrogram.shape)
 
         # Taking the logarithm of the Mel spectrogram is a common step because
         # human perception of sound intensity is logarithmic in nature
@@ -52,15 +63,16 @@ class LibrosaClient(ports.AudioFileClient):
         log_mel_spectrogram = (
             log_mel_spectrogram - np.mean(log_mel_spectrogram)
         ) / np.std(log_mel_spectrogram)
+        print(log_mel_spectrogram.shape)
 
         return log_mel_spectrogram
 
-    def get_duration(self, path: pathlib.Path, sr: int) -> float:
+    def get_duration(self, path_to_audio_file: pathlib.Path, hop_length: int) -> int:
         """
         Get the duration of the audio file in seconds using librosa.
         """
-        y, _ = self._load(path)
-        return librosa.get_duration(y=y, sr=sr)
+        y, sr = self._load(path_to_audio_file)
+        return int(round(librosa.get_duration(y=y, sr=sr, hop_length=hop_length), 0))
 
     def crop(
         self, path: pathlib.Path, start_seconds: float, end_seconds: float
@@ -112,3 +124,4 @@ class LibrosaClient(ports.AudioFileClient):
             raise LoadError(f"Error loading audio file {path}: {e}")
         LibrosaClient.cached_files[path] = (y, sr)
         return y, sr
+

@@ -8,13 +8,13 @@ from pkg.audio_file_client.core import domain
 
 class AudioFileClient(ABC):
     @abstractmethod
-    def get_duration(self, path: pathlib.Path, sr: int) -> float:
+    def get_duration(self, path_to_audio_file: pathlib.Path, hop_length: int) -> int:
         """
         Get the duration of the audio file in seconds
         """
 
     @abstractmethod
-    def crop(self, path: pathlib.Path, start: float, end: float) -> pathlib.Path:
+    def crop(self, path: pathlib.Path, start_seconds: float, end_seconds: float) -> pathlib.Path:
         """
         Crop the audio file and return the path to the cropped audio file
         """
@@ -29,7 +29,7 @@ class AudioFileClient(ABC):
     @abstractmethod
     def extract_mel_spectrogram(
         self,
-        path: pathlib.Path,
+        audio_file_path: pathlib.Path,
         pre_processing_settings: domain.MelSpectrogramPreprocessingSettings,
     ) -> np.ndarray:
         """

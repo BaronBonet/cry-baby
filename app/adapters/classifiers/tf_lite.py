@@ -27,27 +27,28 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
             mel_spectrogram_preprocessing_settings
         )
 
-    def classify(self, audio_file: pathlib.Path) -> float:
-        if not audio_file.exists() or not audio_file.is_file():
+    def classify(self, path_to_audio_file: pathlib.Path) -> float:
+        if not path_to_audio_file.exists() or not path_to_audio_file.is_file():
             raise FileNotFoundError
 
         # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds
         if (
-                duration := self.audio_file_client.get_duration(
-                audio_file, self.mel_spectrogram_preprocessing_settings.sampling_rate_hz
-            )
+            duration := self.audio_file_client.get_duration(path_to_audio_file, hop_length=self.mel_spectrogram_preprocessing_settings.hop_length)
             != self.mel_spectrogram_preprocessing_settings.duration_seconds
         ):
             raise UnexpectedDurationError(
-                f"Audio file {audio_file} has duration {duration} seconds, "
+                f"Audio file {path_to_audio_file} has duration {duration} seconds, "
                 f"but the pre_processing_settings.duration_seconds is"
                 f" {self.mel_spectrogram_preprocessing_settings.duration_seconds}"
             )
 
         # Extract features
         mel_spec = self.audio_file_client.extract_mel_spectrogram(
-            audio_file, self.mel_spectrogram_preprocessing_settings
+            path_to_audio_file, self.mel_spectrogram_preprocessing_settings
         )
+        # TODO: validate shape
+        print(mel_spec.shape)
+        
         interpreter = tflite.Interpreter(model_path=str(self.model_path))
         interpreter.allocate_tensors()
 
@@ -59,7 +60,6 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
         mel_spec = np.expand_dims(mel_spec, axis=-1)  # Add a channel dimension
 
         interpreter.set_tensor(input_details["index"], mel_spec)
-        print("tensors set")
 
         interpreter.invoke()
 

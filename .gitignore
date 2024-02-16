@@ -1,4 +1,6 @@
 .git
 .idea
 __pycache__
-.wav
+*.wav
+.venv
+.pytest_cache

@@ -1,6 +1,8 @@
 import pathlib
 
 import numpy as np
+import tensorflow as tf
+from tensorflow import keras
 
 from app.core import ports
 from pkg.audio_file_client.core.domain import \
@@ -9,19 +11,25 @@ from pkg.audio_file_client.core.ports import AudioFileClient
 
 
 class TensorFlowClassifier(ports.Classifier):
-    def __init__(self, model: tf.keras.Model, audio_file_client: AudioFileClient):
+    def __init__(
+        self,
+        mel_spectrogram_preprocessing_settings: MelSpectrogramPreprocessingSettings,
+        model: tf.keras.Model,
+        audio_file_client: AudioFileClient,
+    ):
         self.model = model
         self.audio_file_client = audio_file_client
+        self.mel_spectrogram_preprocessing_settings = mel_spectrogram_preprocessing_settings
 
     def classify(
         self,
-        path: pathlib.Path,
-        mel_spectrogram_preprocessing_settings: MelSpectrogramPreprocessingSettings,
+        path_to_audio_file: pathlib.Path,
     ) -> float:
         # Extract features
         mel_spec = self.audio_file_client.extract_mel_spectrogram(
-            path, mel_spectrogram_preprocessing_settings
+            path_to_audio_file, self.mel_spectrogram_preprocessing_settings
         )
+
         mel_spec = np.expand_dims(mel_spec, axis=-1)  # Add a channel dimension
 
         mel_spec = np.expand_dims(mel_spec, axis=0)  # Add a batch dimension
