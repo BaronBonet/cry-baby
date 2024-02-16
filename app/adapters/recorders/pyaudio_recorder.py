@@ -69,14 +69,46 @@ class PyaudioRecorder(ports.Recorder):
 
     def record(self) -> pathlib.Path:
         file_path = self.temp_path / f"{uuid.uuid4()}.wav"
-        stream = self._create_stream()
-        frames = self._record(
-            stream=stream,
+
+        audio = pyaudio.PyAudio()
+
+        stream = audio.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=44100,
+            input=True,
+            frames_per_buffer=1024,
         )
+
+        print("recording...")
+
+        frames = []
+
+        for _ in range(0, int(44100 / 1024 * 4)):
+            data = stream.read(1024)
+            frames.append(data)
+
+        print("finished recording")
+
         stream.stop_stream()
         stream.close()
+        audio.terminate()
 
-        self._write_to_file(file_path=file_path, frames=frames)
+        waveFile = wave.open(str(file_path), "wb")
+        waveFile.setnchannels(1)
+        waveFile.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
+        waveFile.setframerate(44100)
+        waveFile.writeframes(b"".join(frames))
+        waveFile.close()
+
+        # stream = self._create_stream()
+        # frames = self._record(
+        #     stream=stream,
+        # )
+        # stream.stop_stream()
+        # stream.close()
+        #
+        # self._write_to_file(file_path=file_path, frames=frames)
         return file_path
 
     # def record_async(self, recording_rate_khz: int, duration: float) -> queue.Queue:

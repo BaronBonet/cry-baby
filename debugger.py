@@ -42,8 +42,8 @@ def main():
             hop_length=512,
         ),
     )
-    # prediction = classifier.classify(pathlib.Path("new_crying.wav"))
-    #
+    # prediction = classifier.classify(pathlib.Path("pkg")/"audio_file_client"/"tests"/"data"/ "test.wav")
+    # #
     # print(prediction)
 
     evalualtion = CryBabyService(

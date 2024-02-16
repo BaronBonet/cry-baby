@@ -30,18 +30,19 @@ class LibrosaClient(ports.AudioFileClient):
             duration := self.get_duration(
                 path_to_audio_file=audio_file_path,
                 hop_length=pre_processing_settings.hop_length,
+                sampling_rate_hz=pre_processing_settings.sampling_rate_hz,
             )
         ) != pre_processing_settings.duration_seconds:
-            raise UnexpectedDurationError(
+            print(
+            # raise UnexpectedDurationError(
                 f"Audio file {audio_file_path} has duration {duration} seconds, "
                 f"but the pre_processing_settings.duration_seconds is {pre_processing_settings.duration_seconds}"
             )
 
-        y, sr = self._load(audio_file_path)
+        y, sr = self._load(audio_file_path, pre_processing_settings.sampling_rate_hz)
 
         if sr != pre_processing_settings.sampling_rate_hz:
-            # raise ValueError(
-            print(
+            raise ValueError(
                 f"Audio file {audio_file_path} has sampling rate {sr}, "
                 f"but the pre_processing_settings.sampling_rate_hz is {pre_processing_settings.sampling_rate_hz}"
                 "they should be the same"
@@ -53,7 +54,16 @@ class LibrosaClient(ports.AudioFileClient):
             n_mels=pre_processing_settings.number_of_mel_bands,
             hop_length=pre_processing_settings.hop_length,
         )
-        print(mel_spectrogram.shape)
+
+        target_shape = _calc_target_shape(
+            pre_processing_settings.sampling_rate_hz,
+            pre_processing_settings.duration_seconds,
+            pre_processing_settings.number_of_mel_bands,
+            pre_processing_settings.hop_length,
+        )
+
+        if mel_spectrogram.shape != target_shape:
+            mel_spectrogram = _resize_matrix(mel_spectrogram, target_shape)
 
         # Taking the logarithm of the Mel spectrogram is a common step because
         # human perception of sound intensity is logarithmic in nature
@@ -67,12 +77,14 @@ class LibrosaClient(ports.AudioFileClient):
 
         return log_mel_spectrogram
 
-    def get_duration(self, path_to_audio_file: pathlib.Path, hop_length: int) -> int:
+    def get_duration(
+        self, path_to_audio_file: pathlib.Path, hop_length: int, sampling_rate_hz: int
+    ) -> float:
         """
         Get the duration of the audio file in seconds using librosa.
         """
-        y, sr = self._load(path_to_audio_file)
-        return int(round(librosa.get_duration(y=y, sr=sr, hop_length=hop_length), 0))
+        y, sr = self._load(path_to_audio_file, sampling_rate_hz)
+        return librosa.get_duration(y=y, sr=sr, hop_length=hop_length)
 
     def crop(
         self, path: pathlib.Path, start_seconds: float, end_seconds: float
@@ -110,7 +122,7 @@ class LibrosaClient(ports.AudioFileClient):
             return path
 
     @staticmethod
-    def _load(path: pathlib.Path) -> tuple[np.ndarray, float]:
+    def _load(path: pathlib.Path, sampling_rate_hz: int) -> tuple[np.ndarray, float]:
         """
         Load the audio file using librosa.
         if it is not contained in our local in memory cache.
@@ -119,9 +131,36 @@ class LibrosaClient(ports.AudioFileClient):
         if cache:
             return cache
         try:
-            y, sr = librosa.load(path, sr=None)
+            y, sr = librosa.load(path, sr=sampling_rate_hz)
         except Exception as e:
             raise LoadError(f"Error loading audio file {path}: {e}")
         LibrosaClient.cached_files[path] = (y, sr)
         return y, sr
+
+
+def _calc_target_shape(
+    sampling_rate_hz: int,
+    duration_seconds: int,
+    number_of_mel_bands: int,
+    hop_length: int,
+) -> tuple[int, int]:
+    number_of_samples = duration_seconds * sampling_rate_hz
+    number_of_frames = int((number_of_samples + hop_length) / hop_length)
+    return number_of_mel_bands, number_of_frames
+
+
+def _resize_matrix(
+    matrix: np.ndarray, target_shape: tuple[int, int]
+) -> np.ndarray:
+    if matrix.shape[1] < target_shape[1]:
+        padding = np.zeros(
+            (
+                matrix.shape[0],
+                target_shape[1] - matrix.shape[1],
+            )
+        )
+        return np.hstack((matrix, padding))
+    elif matrix.shape[1] > target_shape[1]:
+        matrix = matrix[:, : target_shape[1]]
+    return matrix
 
