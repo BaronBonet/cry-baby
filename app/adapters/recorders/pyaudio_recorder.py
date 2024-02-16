@@ -1,6 +1,7 @@
 import pathlib
 import wave
 from dataclasses import dataclass
+import math
 
 import pyaudio
 from hexalog.ports import Logger
@@ -70,45 +71,14 @@ class PyaudioRecorder(ports.Recorder):
     def record(self) -> pathlib.Path:
         file_path = self.temp_path / f"{uuid.uuid4()}.wav"
 
-        audio = pyaudio.PyAudio()
-
-        stream = audio.open(
-            format=pyaudio.paInt16,
-            channels=1,
-            rate=44100,
-            input=True,
-            frames_per_buffer=1024,
+        stream = self._create_stream()
+        frames = self._record(
+            stream=stream,
         )
-
-        print("recording...")
-
-        frames = []
-
-        for _ in range(0, int(44100 / 1024 * 4)):
-            data = stream.read(1024)
-            frames.append(data)
-
-        print("finished recording")
-
         stream.stop_stream()
         stream.close()
-        audio.terminate()
 
-        waveFile = wave.open(str(file_path), "wb")
-        waveFile.setnchannels(1)
-        waveFile.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
-        waveFile.setframerate(44100)
-        waveFile.writeframes(b"".join(frames))
-        waveFile.close()
-
-        # stream = self._create_stream()
-        # frames = self._record(
-        #     stream=stream,
-        # )
-        # stream.stop_stream()
-        # stream.close()
-        #
-        # self._write_to_file(file_path=file_path, frames=frames)
+        self._write_to_file(file_path=file_path, frames=frames)
         return file_path
 
     # def record_async(self, recording_rate_khz: int, duration: float) -> queue.Queue:
@@ -135,14 +105,14 @@ class PyaudioRecorder(ports.Recorder):
             format=self.settings.audio_file_format,
             channels=self.settings.number_of_audio_signals,
             rate=self.settings.recording_rate_hz,
-            # frames_per_buffer=self.settings.frames_per_buffer,
+            frames_per_buffer=self.settings.frames_per_buffer,
         )
         return self.audio_object.open(
             format=self.settings.audio_file_format,
             channels=self.settings.number_of_audio_signals,
             rate=self.settings.recording_rate_hz,
             input=True,
-            # frames_per_buffer=self.settings.frames_per_buffer,
+            frames_per_buffer=self.settings.frames_per_buffer,
         )
 
     def _record(self, stream: pyaudio.Stream) -> list[bytes]:
@@ -158,11 +128,11 @@ class PyaudioRecorder(ports.Recorder):
         frames = []
         for _ in range(
             0,
-            int(
+            int(math.ceil(
                 self.settings.recording_rate_hz
                 / self.settings.frames_per_buffer
                 * self.settings.duration_seconds
-            ),
+            )),
         ):
             frames.append(stream.read(self.settings.frames_per_buffer))
         return frames

@@ -25,16 +25,18 @@ class LibrosaClient(ports.AudioFileClient):
         if not audio_file_path.exists() or not audio_file_path.is_file():
             raise FileNotFoundError
 
-        # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds
+        # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds, within a margin of error
         if (
-            duration := self.get_duration(
-                path_to_audio_file=audio_file_path,
-                hop_length=pre_processing_settings.hop_length,
-                sampling_rate_hz=pre_processing_settings.sampling_rate_hz,
+            duration := round(
+                self.get_duration(
+                    path_to_audio_file=audio_file_path,
+                    hop_length=pre_processing_settings.hop_length,
+                    sampling_rate_hz=pre_processing_settings.sampling_rate_hz,
+                ),
+                1,
             )
-        ) != pre_processing_settings.duration_seconds:
-            print(
-            # raise UnexpectedDurationError(
+        ) != round(pre_processing_settings.duration_seconds, 1):
+            raise UnexpectedDurationError(
                 f"Audio file {audio_file_path} has duration {duration} seconds, "
                 f"but the pre_processing_settings.duration_seconds is {pre_processing_settings.duration_seconds}"
             )
@@ -149,9 +151,7 @@ def _calc_target_shape(
     return number_of_mel_bands, number_of_frames
 
 
-def _resize_matrix(
-    matrix: np.ndarray, target_shape: tuple[int, int]
-) -> np.ndarray:
+def _resize_matrix(matrix: np.ndarray, target_shape: tuple[int, int]) -> np.ndarray:
     if matrix.shape[1] < target_shape[1]:
         padding = np.zeros(
             (
@@ -163,4 +163,3 @@ def _resize_matrix(
     elif matrix.shape[1] > target_shape[1]:
         matrix = matrix[:, : target_shape[1]]
     return matrix
-

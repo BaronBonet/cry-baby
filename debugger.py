@@ -42,15 +42,11 @@ def main():
             hop_length=512,
         ),
     )
-    # prediction = classifier.classify(pathlib.Path("pkg")/"audio_file_client"/"tests"/"data"/ "test.wav")
-    # #
-    # print(prediction)
 
-    evalualtion = CryBabyService(
+    evaluation = CryBabyService(
         logger=logger, classifier=classifier, recorder=recorder
     ).evaluate_from_microphone()
-    # evalualtion
-    print(evalualtion)
+    print(evaluation)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ import pathlib
 
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
+from tensorflow.keras.models import Model
 
 from app.core import ports
 from pkg.audio_file_client.core.domain import \
@@ -14,7 +14,7 @@ class TensorFlowClassifier(ports.Classifier):
     def __init__(
         self,
         mel_spectrogram_preprocessing_settings: MelSpectrogramPreprocessingSettings,
-        model: tf.keras.Model,
+        model: Model,
         audio_file_client: AudioFileClient,
     ):
         self.model = model
