@@ -75,7 +75,6 @@ class LibrosaClient(ports.AudioFileClient):
         log_mel_spectrogram = (
             log_mel_spectrogram - np.mean(log_mel_spectrogram)
         ) / np.std(log_mel_spectrogram)
-        print(log_mel_spectrogram.shape)
 
         return log_mel_spectrogram
 

@@ -1,7 +1,6 @@
 import pathlib
 import queue
 from abc import ABC, abstractmethod
-import threading
 from typing import Optional
 
 from pkg.audio_file_client.core.domain import \
@@ -43,17 +42,17 @@ class Recorder(ABC):
         """
 
     @abstractmethod
-    def __enter__(self) -> "Recorder":
+    def setup(self):
         """
-        Enter the context manager. Returns self to allow usage with the 'with' statement.
+        Setup the required resources for recording
         """
-        return self
 
     @abstractmethod
-    def __exit__(self, exc_type, exc_val, exc_tb) -> Optional[bool]:
+    def tear_down(self):
         """
-        Exit the context manager. This method is meant to handle exception cleanup if necessary.
+        Tear down the required resources for recording
         """
+
 
 
 class Service(ABC):
@@ -69,4 +68,10 @@ class Service(ABC):
         """
         Continuously record audio and classify it
         return a queue of the probabilities that the audio contains a baby crying
+        """
+
+    @abstractmethod
+    def stop_continuous_evaluation(self):
+        """
+        Stop the continuous evaluation
         """

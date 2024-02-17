@@ -5,6 +5,7 @@ description = ""
 authors = ["ericcbonet <ericcbonet@gmail.com>"]
 readme = "README.md"
 
+
 [tool.poetry.dependencies]
 python = "^3.10,<3.12"
 hexalog = "^0.6.0"
@@ -29,8 +30,6 @@ pytest = "^7.4.4"
 black = "^23.12.1"
 isort = "^5.13.2"
 flake8 = "^7.0.0"
-# TODO: is this needed for debugging?
-# debugpy = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]

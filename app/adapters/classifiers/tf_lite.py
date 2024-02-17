@@ -33,7 +33,11 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
 
         # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds
         if (
-            duration := self.audio_file_client.get_duration(path_to_audio_file, hop_length=self.mel_spectrogram_preprocessing_settings.hop_length)
+            duration := self.audio_file_client.get_duration(
+                path_to_audio_file,
+                hop_length=self.mel_spectrogram_preprocessing_settings.hop_length,
+                sampling_rate_hz=self.mel_spectrogram_preprocessing_settings.sampling_rate_hz,
+            )
             != self.mel_spectrogram_preprocessing_settings.duration_seconds
         ):
             raise UnexpectedDurationError(
@@ -46,9 +50,7 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
         mel_spec = self.audio_file_client.extract_mel_spectrogram(
             path_to_audio_file, self.mel_spectrogram_preprocessing_settings
         )
-        # TODO: validate shape
-        print(mel_spec.shape)
-        
+
         interpreter = tflite.Interpreter(model_path=str(self.model_path))
         interpreter.allocate_tensors()
 
