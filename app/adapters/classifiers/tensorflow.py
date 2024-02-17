@@ -1,7 +1,6 @@
 import pathlib
 
 import numpy as np
-import tensorflow as tf
 from tensorflow.keras.models import Model
 
 from app.core import ports
@@ -25,7 +24,6 @@ class TensorFlowClassifier(ports.Classifier):
         self,
         path_to_audio_file: pathlib.Path,
     ) -> float:
-        # Extract features
         mel_spec = self.audio_file_client.extract_mel_spectrogram(
             path_to_audio_file, self.mel_spectrogram_preprocessing_settings
         )
@@ -34,7 +32,6 @@ class TensorFlowClassifier(ports.Classifier):
 
         mel_spec = np.expand_dims(mel_spec, axis=0)  # Add a batch dimension
 
-        # Predict
         prediction: np.ndarray = self.model.predict(mel_spec)
 
         if prediction.shape != (1, 1):

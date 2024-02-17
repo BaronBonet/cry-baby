@@ -1,4 +1,7 @@
 import pathlib
+import threading
+import queue
+from typing import Optional
 import wave
 from dataclasses import dataclass
 import math
@@ -59,19 +62,23 @@ class PyaudioRecorder(ports.Recorder):
         self.logger = logger
         self.settings = settings
 
+        self.stop_event = threading.Event()
+
     def __enter__(self):
         self.audio_object = pyaudio.PyAudio()
         return self
 
     def __exit__(self, _exc_type, _exc_val, _exc_tb):
         if self.audio_object is not None:
+            self.stop_event.wait()
+
             self.logger.debug("Terminating audio object")
             self.audio_object.terminate()
 
     def record(self) -> pathlib.Path:
         file_path = self.temp_path / f"{uuid.uuid4()}.wav"
 
-        stream = self._create_stream()
+        stream = self._create_audio_stream()
         frames = self._record(
             stream=stream,
         )
@@ -81,25 +88,23 @@ class PyaudioRecorder(ports.Recorder):
         self._write_to_file(file_path=file_path, frames=frames)
         return file_path
 
-    # def record_async(self, recording_rate_khz: int, duration: float) -> queue.Queue:
-    #     """
-    #     Record audio and save it to the path
-    #     """
-    #     audio_recorded_queue = queue.Queue()
-    #     stream = self._create_stream()
-    #     recording_thread = threading.Thread(
-    #         target=self._record_audio,
-    #         args=(recording_rate_khz, stream, audio_recorded_queue),
-    #     )
-    #     recording_thread.start()
-    #     self.logger.debug(
-    #         "Begin recording audio",
-    #         duration=duration,
-    #         recording_rate_khz=recording_rate_khz,
-    #     )
-    #     return audio_recorded_queue
+    def continuously_record(self) -> Optional[queue.Queue]:
+        stream = self._create_audio_stream()
+        audio_recorded_queue = queue.Queue()
 
-    def _create_stream(self):
+        recording_thread = threading.Thread(
+            target=self._record_continuous,
+            args=(stream, audio_recorded_queue),
+        )
+        self.logger.debug("Starting recording thread")
+        recording_thread.start()
+        self.logger.debug("Recording thread started")
+        return audio_recorded_queue
+
+    def stop_recording(self):
+        self.stop_event.set()
+
+    def _create_audio_stream(self) -> pyaudio.Stream:
         self.logger.debug(
             "Creating audio stream",
             format=self.settings.audio_file_format,
@@ -136,6 +141,27 @@ class PyaudioRecorder(ports.Recorder):
         ):
             frames.append(stream.read(self.settings.frames_per_buffer))
         return frames
+
+
+    def _record_continuous(self, stream: pyaudio.Stream, audio_recorded_queue: queue.Queue):
+        while not self.stop_event.is_set():
+            self.logger.debug("Starting to record continuously")
+            frames = []
+            for _ in range(
+                0,
+                int(math.ceil(
+                    self.settings.recording_rate_hz
+                    / self.settings.frames_per_buffer
+                    * self.settings.duration_seconds
+                )),
+            ):
+                if self.stop_event.is_set():
+                    break
+                frames.append(stream.read(self.settings.frames_per_buffer, exception_on_overflow=False))
+            file_path = self.temp_path / f"{uuid.uuid4()}.wav"
+            self._write_to_file(file_path, frames)
+            audio_recorded_queue.put(file_path)
+
 
     def _write_to_file(self, file_path: pathlib.Path, frames: list[bytes]):
         # record audio in chunks

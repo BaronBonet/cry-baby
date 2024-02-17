@@ -1,8 +1,11 @@
 import pathlib
+import queue
 from abc import ABC, abstractmethod
+import threading
 from typing import Optional
 
-from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
+from pkg.audio_file_client.core.domain import \
+    MelSpectrogramPreprocessingSettings
 
 
 class Classifier(ABC):
@@ -26,11 +29,18 @@ class Recorder(ABC):
         Record audio and save it to the path
         """
 
-    # @abstractmethod
-    # def record_async(self, recording_rate_khz: int, duration: float) -> Optional[queue.Queue]:
-    #     """
-    #     Record audio and save it to the path
-    #     """
+    @abstractmethod
+    def continuously_record(self) -> Optional[queue.Queue]:
+        """
+        Continuously record audio and save it to the path
+        returns a queue of the audio recorded and an event to stop the recording
+
+        Usage:
+        ```
+        with recorder:
+            audio_queue = recorder.continuously_record()
+        ```
+        """
 
     @abstractmethod
     def __enter__(self) -> "Recorder":
@@ -44,7 +54,6 @@ class Recorder(ABC):
         """
         Exit the context manager. This method is meant to handle exception cleanup if necessary.
         """
-        pass
 
 
 class Service(ABC):
@@ -53,4 +62,11 @@ class Service(ABC):
         """
         Record audio and classify it
         return the probability that the audio contains a baby crying
+        """
+
+    @abstractmethod
+    def continously_evaluate_from_microphone(self) -> Optional[queue.Queue]:
+        """
+        Continuously record audio and classify it
+        return a queue of the probabilities that the audio contains a baby crying
         """

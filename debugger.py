@@ -43,10 +43,9 @@ def main():
         ),
     )
 
-    evaluation = CryBabyService(
+    CryBabyService(
         logger=logger, classifier=classifier, recorder=recorder
-    ).evaluate_from_microphone()
-    print(evaluation)
+    ).continously_evaluate_from_microphone()
 
 
 if __name__ == "__main__":
