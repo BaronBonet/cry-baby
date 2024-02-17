@@ -1,10 +1,10 @@
+import math
 import pathlib
-import threading
 import queue
-from typing import Optional
+import threading
 import wave
 from dataclasses import dataclass
-import math
+from typing import Optional
 
 import pyaudio
 from hexalog.ports import Logger
@@ -52,7 +52,6 @@ class PyaudioRecorder(ports.Recorder):
         recorder.record(duration=4, recording_rate=44100)
     """
 
-
     def __init__(
         self,
         temp_path: pathlib.Path,
@@ -63,7 +62,6 @@ class PyaudioRecorder(ports.Recorder):
         self.logger = logger
         self.settings = settings
         self.audio_object = None
-
 
     def setup(self):
         if not self.audio_object:
@@ -143,33 +141,41 @@ class PyaudioRecorder(ports.Recorder):
         frames = []
         for _ in range(
             0,
-            int(math.ceil(
-                self.settings.recording_rate_hz
-                / self.settings.frames_per_buffer
-                * self.settings.duration_seconds
-            )),
+            int(
+                math.ceil(
+                    self.settings.recording_rate_hz
+                    / self.settings.frames_per_buffer
+                    * self.settings.duration_seconds
+                )
+            ),
         ):
             frames.append(stream.read(self.settings.frames_per_buffer))
         return frames
 
-
-    def _record_continuous(self, stream: pyaudio.Stream, audio_recorded_queue: queue.Queue):
+    def _record_continuous(
+        self, stream: pyaudio.Stream, audio_recorded_queue: queue.Queue
+    ):
         while True:
             self.logger.debug("Starting to record continuously")
             frames = []
             for _ in range(
                 0,
-                int(math.ceil(
-                    self.settings.recording_rate_hz
-                    / self.settings.frames_per_buffer
-                    * self.settings.duration_seconds
-                )),
+                int(
+                    math.ceil(
+                        self.settings.recording_rate_hz
+                        / self.settings.frames_per_buffer
+                        * self.settings.duration_seconds
+                    )
+                ),
             ):
-                frames.append(stream.read(self.settings.frames_per_buffer, exception_on_overflow=False))
+                frames.append(
+                    stream.read(
+                        self.settings.frames_per_buffer, exception_on_overflow=False
+                    )
+                )
             file_path = self.temp_path / f"{uuid.uuid4()}.wav"
             self._write_to_file(file_path, frames)
             audio_recorded_queue.put(file_path)
-
 
     def _write_to_file(self, file_path: pathlib.Path, frames: list[bytes]):
         if not self.audio_object:

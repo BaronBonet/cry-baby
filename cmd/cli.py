@@ -2,6 +2,7 @@ import argparse
 import pathlib
 import sys
 import threading
+
 import pyaudio
 from hexalog.adapters.cli_logger import ColorfulCLILogger
 from huggingface_hub import from_pretrained_keras
@@ -11,18 +12,25 @@ project_root = pathlib.Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
 from app.adapters.classifiers.tensorflow import TensorFlowClassifier
-from app.adapters.recorders.pyaudio_recorder import PyaudioRecorder, PyaudioRecordingSettings
+from app.adapters.recorders.pyaudio_recorder import (PyaudioRecorder,
+                                                     PyaudioRecordingSettings)
 from app.core.service import CryBabyService
 from pkg.audio_file_client.adapters.librosa_client import LibrosaClient
-from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
+from pkg.audio_file_client.core.domain import \
+    MelSpectrogramPreprocessingSettings
 
 SHUTDOWN_EVENT = threading.Event()
 
-def run_continously(logger: ColorfulCLILogger, recorder: PyaudioRecorder, classifier: TensorFlowClassifier):
+
+def run_continously(
+    logger: ColorfulCLILogger,
+    recorder: PyaudioRecorder,
+    classifier: TensorFlowClassifier,
+):
     service = CryBabyService(logger=logger, classifier=classifier, recorder=recorder)
     logger.info("Starting to continously evaluate from microphone")
     while not SHUTDOWN_EVENT.is_set():
-        try: 
+        try:
             service.continously_evaluate_from_microphone()
             logger.info("Press ctr+c to stop")
             SHUTDOWN_EVENT.wait()
@@ -33,13 +41,20 @@ def run_continously(logger: ColorfulCLILogger, recorder: PyaudioRecorder, classi
             SHUTDOWN_EVENT.set()
             logger.debug("Exiting")
 
+
 def main():
     parser = argparse.ArgumentParser(description="CryBaby CLI Tool")
-    parser.add_argument("--run-continuously-tf", action="store_true",
-                        help="Start continuous recording and evaluation")
+    parser.add_argument(
+        "--run-continuously-tf",
+        action="store_true",
+        help="Start continuous recording and evaluation",
+    )
 
-    parser.add_argument("--run-continuously-tf-lite", action="store_true",
-                        help="Start continuous recording and evaluation with a tensorflow lite model")
+    parser.add_argument(
+        "--run-continuously-tf-lite",
+        action="store_true",
+        help="Start continuous recording and evaluation with a tensorflow lite model",
+    )
 
     args = parser.parse_args()
 
@@ -53,11 +68,13 @@ def main():
         duration_seconds=4,
     )
     recorder = PyaudioRecorder(logger=logger, temp_path=temp_path, settings=settings)
-    
+
     librosa_audio_file_client = LibrosaClient()
 
     if not args.run_continuously_tf:
-        logger.info("Please specify a mode to run, using --run-continuously-tf or --run-continuously-tf-lite")
+        logger.info(
+            "Please specify a mode to run, using --run-continuously-tf or --run-continuously-tf-lite"
+        )
 
     if args.run_continuously_tf:
         model = from_pretrained_keras("ericcbonet/cry-baby")
@@ -74,6 +91,6 @@ def main():
 
         run_continously(logger, recorder, classifier)
 
+
 if __name__ == "__main__":
     main()
-

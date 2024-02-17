@@ -54,7 +54,6 @@ class Recorder(ABC):
         """
 
 
-
 class Service(ABC):
     @abstractmethod
     def evaluate_from_microphone(self) -> float:

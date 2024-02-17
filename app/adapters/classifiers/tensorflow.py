@@ -18,7 +18,9 @@ class TensorFlowClassifier(ports.Classifier):
     ):
         self.model = model
         self.audio_file_client = audio_file_client
-        self.mel_spectrogram_preprocessing_settings = mel_spectrogram_preprocessing_settings
+        self.mel_spectrogram_preprocessing_settings = (
+            mel_spectrogram_preprocessing_settings
+        )
 
     def classify(
         self,

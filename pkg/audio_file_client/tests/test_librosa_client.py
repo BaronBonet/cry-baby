@@ -16,6 +16,7 @@ HOP_LENGTH = 512
 # get path to this directory
 DIR = pathlib.Path(__file__).parent.absolute()
 
+
 def test_the_test():
     assert 1 == 1
 
@@ -31,7 +32,7 @@ def create_dummy_audio_file() -> pathlib.Path:
 
 def test_get_duration(create_dummy_audio_file):
     librosa_client = LibrosaClient()
-    duration = librosa_client.get_duration(create_dummy_audio_file,HOP_LENGTH, SR)
+    duration = librosa_client.get_duration(create_dummy_audio_file, HOP_LENGTH, SR)
 
     assert duration == DURATION
 
@@ -74,12 +75,12 @@ def test_extract_mel_spectrogram(create_dummy_audio_file):
 def test_extract_mel_spectrogram_with_real_audio():
     librosa_client = LibrosaClient()
     mel_spectrogram = librosa_client.extract_mel_spectrogram(
-            DIR /"data" / "test.wav",
-            pre_processing_settings=domain.MelSpectrogramPreprocessingSettings(
-                duration_seconds=4,
-                sampling_rate_hz=SR,
-                number_of_mel_bands=NUMBER_OF_MEL_BANDS,
-                hop_length=HOP_LENGTH,
-            ),
-        )
+        DIR / "data" / "test.wav",
+        pre_processing_settings=domain.MelSpectrogramPreprocessingSettings(
+            duration_seconds=4,
+            sampling_rate_hz=SR,
+            number_of_mel_bands=NUMBER_OF_MEL_BANDS,
+            hop_length=HOP_LENGTH,
+        ),
+    )
     assert mel_spectrogram.shape == (128, 126)

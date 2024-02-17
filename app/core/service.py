@@ -37,7 +37,9 @@ class CryBabyService(ports.Service):
         )
         signal_thread.daemon = True
         signal_thread.start()
-        self.logger.info("Service beginning to continuously evaluate audio from microphone")
+        self.logger.info(
+            "Service beginning to continuously evaluate audio from microphone"
+        )
         self.thread = signal_thread
 
     def _handle_files_written(
