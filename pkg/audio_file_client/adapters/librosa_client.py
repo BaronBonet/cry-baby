@@ -6,8 +6,7 @@ import soundfile as sf
 from librosa.feature import melspectrogram
 
 from pkg.audio_file_client.core import domain, ports
-from pkg.audio_file_client.core.domain import (LoadError,
-                                               UnexpectedDurationError)
+from pkg.audio_file_client.core.domain import LoadError, UnexpectedDurationError
 
 
 class LibrosaClient(ports.AudioFileClient):
@@ -25,7 +24,8 @@ class LibrosaClient(ports.AudioFileClient):
         if not audio_file_path.exists() or not audio_file_path.is_file():
             raise FileNotFoundError
 
-        # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds, within a margin of error
+        # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds,
+        # within a margin of error
         if (
             duration := round(
                 self.get_duration(

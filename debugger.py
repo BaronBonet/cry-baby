@@ -5,12 +5,13 @@ from hexalog.adapters.cli_logger import ColorfulCLILogger
 from huggingface_hub import from_pretrained_keras
 
 from app.adapters.classifiers.tensorflow import TensorFlowClassifier
-from app.adapters.recorders.pyaudio_recorder import (PyaudioRecorder,
-                                                     PyaudioRecordingSettings)
+from app.adapters.recorders.pyaudio_recorder import (
+    PyaudioRecorder,
+    PyaudioRecordingSettings,
+)
 from app.core.service import CryBabyService
 from pkg.audio_file_client.adapters.librosa_client import LibrosaClient
-from pkg.audio_file_client.core.domain import \
-    MelSpectrogramPreprocessingSettings
+from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
 
 
 def main():

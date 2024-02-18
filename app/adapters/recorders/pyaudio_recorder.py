@@ -22,8 +22,8 @@ class PyaudioRecordingSettings:
     duration_seconds: float  # e.g. 4
     """
     frames_per_buffer determines the number of frames (audio samples) processed in each buffer during audio recording.
-    It affects the granularity of audio processing and I/O operations. 
-    A smaller buffer size provides lower latency, but requires more CPU resources and is more prone to buffer overflows. 
+    It affects the granularity of audio processing and I/O operations.
+    A smaller buffer size provides lower latency, but requires more CPU resources and is more prone to buffer overflows.
 
     With a larger buffersize, the audio system waits to fill the entire buffer before processing it. This results
     in higher latency because there is a delay between the audio input (e.g. recording from a microphone) and the

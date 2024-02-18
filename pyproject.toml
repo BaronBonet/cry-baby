@@ -21,10 +21,6 @@ tensorflow-io-gcs-filesystem = { version="^0.34.0", platform = "darwin", markers
 huggingface-hub = {  version =  "^0.20.3", platform = "darwin", markers = "platform_machine=='arm64'" }
 
 
-# TODO: for running on nuc how to make this work
-[tool.poetry.extras]
-macos = ["tensorflow-macos", "tensorflow", "tensorflow-io-gcs-filesystem"]
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
 black = "^23.12.1"

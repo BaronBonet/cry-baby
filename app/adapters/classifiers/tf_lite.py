@@ -5,7 +5,9 @@ import tflite
 
 from app.core import ports
 from pkg.audio_file_client.core.domain import (
-    MelSpectrogramPreprocessingSettings, UnexpectedDurationError)
+    MelSpectrogramPreprocessingSettings,
+    UnexpectedDurationError,
+)
 from pkg.audio_file_client.core.ports import AudioFileClient
 
 

@@ -3,8 +3,7 @@ import queue
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from pkg.audio_file_client.core.domain import \
-    MelSpectrogramPreprocessingSettings
+from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
 
 
 class Classifier(ABC):

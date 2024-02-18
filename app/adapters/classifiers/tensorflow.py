@@ -4,8 +4,7 @@ import numpy as np
 from tensorflow.keras.models import Model
 
 from app.core import ports
-from pkg.audio_file_client.core.domain import \
-    MelSpectrogramPreprocessingSettings
+from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
 from pkg.audio_file_client.core.ports import AudioFileClient
 
 
