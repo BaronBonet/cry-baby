@@ -6,14 +6,16 @@ import pyaudio
 from hexalog.adapters.cli_logger import ColorfulCLILogger
 from huggingface_hub import from_pretrained_keras
 
-from app.adapters.classifiers.tensorflow import TensorFlowClassifier
-from app.adapters.recorders.pyaudio_recorder import (
+from cry_baby.app.adapters.classifiers.tensorflow import TensorFlowClassifier
+from cry_baby.app.adapters.recorders.pyaudio_recorder import (
     PyaudioRecorder,
     PyaudioRecordingSettings,
 )
-from app.core.service import CryBabyService
-from pkg.audio_file_client.adapters.librosa_client import LibrosaClient
-from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
+from cry_baby.app.core.service import CryBabyService
+from cry_baby.pkg.audio_file_client.adapters.librosa_client import LibrosaClient
+from cry_baby.pkg.audio_file_client.core.domain import (
+    MelSpectrogramPreprocessingSettings,
+)
 
 SHUTDOWN_EVENT = threading.Event()
 

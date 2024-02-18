@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from pkg.audio_file_client.adapters.librosa_client import LibrosaClient
-from pkg.audio_file_client.core import domain
+from cry_baby.pkg.audio_file_client.adapters.librosa_client import LibrosaClient
+from cry_baby.pkg.audio_file_client.core import domain
 
 TMP_PATH = pathlib.Path("/tmp")
 SR = 16000

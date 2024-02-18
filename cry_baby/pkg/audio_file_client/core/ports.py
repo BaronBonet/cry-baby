@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from pkg.audio_file_client.core import domain
+from cry_baby.pkg.audio_file_client.core import domain
 
 
 class AudioFileClient(ABC):

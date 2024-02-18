@@ -3,9 +3,11 @@ import pathlib
 import numpy as np
 from tensorflow.keras.models import Model
 
-from app.core import ports
-from pkg.audio_file_client.core.domain import MelSpectrogramPreprocessingSettings
-from pkg.audio_file_client.core.ports import AudioFileClient
+from cry_baby.app.core import ports
+from cry_baby.pkg.audio_file_client.core.domain import (
+    MelSpectrogramPreprocessingSettings,
+)
+from cry_baby.pkg.audio_file_client.core.ports import AudioFileClient
 
 
 class TensorFlowClassifier(ports.Classifier):

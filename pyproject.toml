@@ -18,7 +18,7 @@ soundfile = "^0.12.1"
 tensorflow-macos = { version = "^2.13.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
 tensorflow = { version = "^2.13.0", platform = "darwin", markers = "platform_machine != 'arm64'"}
 tensorflow-io-gcs-filesystem = { version="^0.34.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
-huggingface-hub = {  version =  "^0.20.3", platform = "darwin", markers = "platform_machine=='arm64'" }
+huggingface-hub = {  version =  "^0.20.3", platform = "darwin", markers = "platform_machine=='arm64'", extras = ["tensorflow"] }
 
 
 [tool.poetry.group.dev.dependencies]

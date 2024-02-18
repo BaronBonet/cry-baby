@@ -10,7 +10,7 @@ import pyaudio
 from hexalog.ports import Logger
 from huggingface_hub.file_download import uuid
 
-from app.core import ports
+from cry_baby.app.core import ports
 
 
 @dataclass

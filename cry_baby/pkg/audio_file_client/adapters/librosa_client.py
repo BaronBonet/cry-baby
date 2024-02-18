@@ -5,8 +5,11 @@ import numpy as np
 import soundfile as sf
 from librosa.feature import melspectrogram
 
-from pkg.audio_file_client.core import domain, ports
-from pkg.audio_file_client.core.domain import LoadError, UnexpectedDurationError
+from cry_baby.pkg.audio_file_client.core import domain, ports
+from cry_baby.pkg.audio_file_client.core.domain import (
+    LoadError,
+    UnexpectedDurationError,
+)
 
 
 class LibrosaClient(ports.AudioFileClient):

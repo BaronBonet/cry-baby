@@ -4,7 +4,7 @@ from typing import Optional
 
 import hexalog.ports
 
-from app.core import ports
+from cry_baby.app.core import ports
 
 
 class CryBabyService(ports.Service):
