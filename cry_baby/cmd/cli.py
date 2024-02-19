@@ -1,4 +1,4 @@
-import argparse
+import importlib.util
 import os
 import pathlib
 import threading
@@ -20,6 +20,16 @@ from cry_baby.pkg.audio_file_client.core.domain import (
 SHUTDOWN_EVENT = threading.Event()
 
 
+def tensorflow_available():
+    tensorflow_spec = importlib.util.find_spec("tensorflow")
+    return tensorflow_spec is not None
+
+
+def tflite_runtime_available():
+    tflite_spec = importlib.util.find_spec("tflite_runtime")
+    return tflite_spec is not None
+
+
 def run_continously(logger: ColorfulCLILogger, recorder: PyaudioRecorder, classifier):
     service = CryBabyService(logger=logger, classifier=classifier, recorder=recorder)
     logger.info("Starting to continously evaluate from microphone")
@@ -37,21 +47,6 @@ def run_continously(logger: ColorfulCLILogger, recorder: PyaudioRecorder, classi
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CryBaby CLI Tool")
-    parser.add_argument(
-        "--run-continuously-tf",
-        action="store_true",
-        help="Start continuous recording and evaluation",
-    )
-
-    parser.add_argument(
-        "--run-continuously-tf-lite",
-        action="store_true",
-        help="Start continuous recording and evaluation with a tensorflow lite model",
-    )
-
-    args = parser.parse_args()
-
     logger = ColorfulCLILogger()
     temp_path = pathlib.Path("/tmp")
     settings = PyaudioRecordingSettings(
@@ -65,10 +60,6 @@ def main():
 
     librosa_audio_file_client = LibrosaClient()
 
-    if not args.run_continuously_tf or not args.run_continuously_tf_lite:
-        logger.info(
-            "Please specify a mode to run, using --run-continuously-tf or --run-continuously-tf-lite"
-        )
     mel_spectrogram_preprocessing_settings = MelSpectrogramPreprocessingSettings(
         sampling_rate_hz=16000,
         number_of_mel_bands=128,
@@ -76,36 +67,37 @@ def main():
         hop_length=512,
     )
 
-    # TODO: Yes, it's horrible to import models here
-    if args.run_continuously_tf:
-        model = from_pretrained_keras("ericcbonet/cry-baby")
-
+    # TODO: it's horrible to import the classifiers here
+    if tensorflow_available():
         from cry_baby.app.adapters.classifiers.tensorflow import TensorFlowClassifier
 
+        model = from_pretrained_keras("ericcbonet/cry-baby")
         classifier = TensorFlowClassifier(
             model=model,
             audio_file_client=librosa_audio_file_client,
             mel_spectrogram_preprocessing_settings=mel_spectrogram_preprocessing_settings,
         )
-
-    elif args.run_continuously_tf_lite:
+        logger.info("Using TensorFlow classifier.")
+    elif tflite_runtime_available():
         from cry_baby.app.adapters.classifiers.tf_lite import TFLiteClassifier
 
         token = os.getenv("HUGGINGFACE_TOKEN")
         if not token:
-            raise KeyError("HUGGINGFACE_TOKEN does not exist in the environment")
-
+            logger.error("HUGGINGFACE_TOKEN does not exist in the environment")
+            return
         login(token=token)
         model_path = hf_hub_download(
             repo_id="ericcbonet/cry_baby_lite", filename="model.tflite"
         )
-
-        print(model_path)
         classifier = TFLiteClassifier(
             mel_spectrogram_preprocessing_settings,
             librosa_audio_file_client,
             pathlib.Path(model_path),
         )
+        logger.info("Using TensorFlow Lite classifier.")
+    else:
+        logger.error("No compatible TensorFlow or TensorFlow Lite installation found.")
+        return
 
     run_continously(logger, recorder, classifier)
 

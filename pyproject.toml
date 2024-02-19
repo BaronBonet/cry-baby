@@ -15,11 +15,12 @@ keras = "^2.13.0"
 librosa = "^0.10.1"
 soundfile = "^0.12.1"
 
-tensorflow-macos = { version = "^2.13.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
 tensorflow = { version = "^2.13.0", platform = "darwin", markers = "platform_machine != 'arm64'"}
 tensorflow-io-gcs-filesystem = { version="^0.34.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
 
 tflite-runtime = { version = "^2.14.0", platform = "linux" }
+tensorflow-macos = { version = "^2.13.0", platform = "darwin", markers = "platform_machine == 'arm64'"}
+
 huggingface-hub = "^0.20.1"
 
 
