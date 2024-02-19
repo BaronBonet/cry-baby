@@ -1,17 +1,16 @@
 import pathlib
 
 import numpy as np
-import tflite
+import tflite_runtime.interpreter as tflite
 
-from app.core import ports
-from pkg.audio_file_client.core.domain import (
+from cry_baby.app.core import ports
+from cry_baby.pkg.audio_file_client.core.domain import (
     MelSpectrogramPreprocessingSettings,
-    UnexpectedDurationError,
 )
-from pkg.audio_file_client.core.ports import AudioFileClient
+from cry_baby.pkg.audio_file_client.core.ports import AudioFileClient
 
 
-class TFLiteClassifierBabyCrying(ports.Classifier):
+class TFLiteClassifier(ports.Classifier):
     """
     Classify the audio file with the TFLite model
     This will not work on macOS
@@ -19,9 +18,9 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
 
     def __init__(
         self,
-        model_path: pathlib.Path,
-        audio_file_client: AudioFileClient,
         mel_spectrogram_preprocessing_settings: MelSpectrogramPreprocessingSettings,
+        audio_file_client: AudioFileClient,
+        model_path: pathlib.Path,
     ):
         self.model_path = model_path
         self.audio_file_client = audio_file_client
@@ -30,25 +29,6 @@ class TFLiteClassifierBabyCrying(ports.Classifier):
         )
 
     def classify(self, path_to_audio_file: pathlib.Path) -> float:
-        if not path_to_audio_file.exists() or not path_to_audio_file.is_file():
-            raise FileNotFoundError
-
-        # Check that the duration of the audio file is as long as the pre_processing_settings.duration_seconds
-        if (
-            duration := self.audio_file_client.get_duration(
-                path_to_audio_file,
-                hop_length=self.mel_spectrogram_preprocessing_settings.hop_length,
-                sampling_rate_hz=self.mel_spectrogram_preprocessing_settings.sampling_rate_hz,
-            )
-            != self.mel_spectrogram_preprocessing_settings.duration_seconds
-        ):
-            raise UnexpectedDurationError(
-                f"Audio file {path_to_audio_file} has duration {duration} seconds, "
-                f"but the pre_processing_settings.duration_seconds is"
-                f" {self.mel_spectrogram_preprocessing_settings.duration_seconds}"
-            )
-
-        # Extract features
         mel_spec = self.audio_file_client.extract_mel_spectrogram(
             path_to_audio_file, self.mel_spectrogram_preprocessing_settings
         )
