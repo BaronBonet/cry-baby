@@ -91,9 +91,9 @@ def main():
     elif tflite_runtime_available():
         from cry_baby.app.adapters.classifiers.tf_lite import TFLiteClassifier
 
-        token = os.getenv("HUGGINGFACE_TOKEN")
+        token = os.getenv("HUGGING_FACE_TOKEN")
         if not token:
-            logger.error("HUGGINGFACE_TOKEN does not exist in the environment")
+            logger.error("HUGGING_FACE_TOKEN does not exist in the environment")
             return
         login(token=token)
         model_path = hf_hub_download(

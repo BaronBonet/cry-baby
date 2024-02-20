@@ -1,6 +1,4 @@
-define LOAD_ENV
-	@bash -c "source .env; set +a";
-endef
+#!/bin/bash
 
 run:
-	PYTHONPATH="$$pwd:$$PYTHONPATH" poetry run python cry_baby/cmd/cli.py
+	@set -a; . ./.env; set +a; PYTHONPATH="$$pwd:$$PYTHONPATH" poetry run python cry_baby/cmd/cli.py
