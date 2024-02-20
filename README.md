@@ -18,4 +18,4 @@ A Makefile is provided for running Cry Baby.
 make run
 ```
 
-Every 4 seconds, Cry Baby will print the probability of a baby crying in each audio clip it records.
+Every 4 seconds, Cry Baby will print the probability of a baby crying in each audio clip it records. And saves the timestamp, a pointer to the audio file, and the probability to a CSV file.

@@ -55,6 +55,15 @@ class Recorder(ABC):
         """
 
 
+class Repository(ABC):
+    @abstractmethod
+    def save(self, audio_file_path: pathlib.Path, prediction: float):
+        """
+        Save the audio file, and it's prediction to the repository
+        TODO: Probably should also store which version of the model was used
+        """
+
+
 class Service(ABC):
     @abstractmethod
     def evaluate_from_microphone(self) -> float:

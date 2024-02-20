@@ -11,6 +11,8 @@ from cry_baby.app.adapters.recorders.pyaudio_recorder import (
     PyaudioRecorder,
     PyaudioRecordingSettings,
 )
+from cry_baby.app.adapters.repositories.csv_repo import CSVRepo
+from cry_baby.app.core.ports import Repository
 from cry_baby.app.core.service import CryBabyService
 from cry_baby.pkg.audio_file_client.adapters.librosa_client import LibrosaClient
 from cry_baby.pkg.audio_file_client.core.domain import (
@@ -30,8 +32,15 @@ def tflite_runtime_available():
     return tflite_spec is not None
 
 
-def run_continously(logger: ColorfulCLILogger, recorder: PyaudioRecorder, classifier):
-    service = CryBabyService(logger=logger, classifier=classifier, recorder=recorder)
+def run_continously(
+    logger: ColorfulCLILogger,
+    recorder: PyaudioRecorder,
+    classifier,
+    repository: Repository,
+):
+    service = CryBabyService(
+        logger=logger, classifier=classifier, recorder=recorder, repository=repository
+    )
     logger.info("Starting to continously evaluate from microphone")
     while not SHUTDOWN_EVENT.is_set():
         try:
@@ -57,6 +66,7 @@ def main():
         duration_seconds=4,
     )
     recorder = PyaudioRecorder(logger=logger, temp_path=temp_path, settings=settings)
+    repository = CSVRepo(csv_file_path=pathlib.Path("predictions.csv"))
 
     librosa_audio_file_client = LibrosaClient()
 
@@ -99,7 +109,7 @@ def main():
         logger.error("No compatible TensorFlow or TensorFlow Lite installation found.")
         return
 
-    run_continously(logger, recorder, classifier)
+    run_continously(logger, recorder, classifier, repository)
 
 
 if __name__ == "__main__":

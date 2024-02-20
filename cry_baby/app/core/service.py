@@ -13,10 +13,12 @@ class CryBabyService(ports.Service):
         logger: hexalog.ports.Logger,
         classifier: ports.Classifier,
         recorder: ports.Recorder,
+        repository: ports.Repository,
     ):
         self.logger = logger
         self.classifier = classifier
         self.recorder = recorder
+        self.repository = repository
 
     def evaluate_from_microphone(
         self,
@@ -50,6 +52,7 @@ class CryBabyService(ports.Service):
             self.logger.debug(f"File written: {file_path}")
             prediction = classifier.classify(file_path)
             self.logger.debug(f"Prediction: {prediction}")
+            self.repository.save(file_path, prediction)
 
     def stop_continuous_evaluation(self):
         self.recorder.tear_down()
