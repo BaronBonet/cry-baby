@@ -1,10 +1,10 @@
 # Cry Baby
 
-I recently had my first kid, to celebrate this I wanted to learn a bit about convolutional neural networks. So I built Cry Baby, a small piece of software which provides a probability that your baby is crying by continuously recording audio, chunking it into 4-second clips, and feeding them into a Convolutional Neural Network (CNN).
+I recently had my first kid, to celebrate this I built Cry Baby, a small piece of software which provides a probability that your baby is crying by continuously recording audio, chunking it into 4-second clips, and feeding them into a Convolutional Neural Network (CNN).
 
 ## Installation
 
-Create a virtual environment and install the dependencies with Poetry using the command poetry install.
+Create a virtual environment and install the dependencies with Poetry using the command `poetry install`.
 
 Depending on your hardware architecture, Poetry should automatically install the correct version of TensorFlow or TensorFlow Lite. This has been tested on a 2022 M1 MacBook Pro and an Intel NUC running Ubuntu 20.04.
 
