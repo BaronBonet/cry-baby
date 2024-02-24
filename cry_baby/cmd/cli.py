@@ -11,7 +11,7 @@ from cry_baby.app.adapters.recorders.pyaudio_recorder import (
     PyaudioRecorder,
     PyaudioRecordingSettings,
 )
-from cry_baby.app.adapters.repositories.csv_repo import CSVRepo
+from cry_baby.app.adapters.repositories.json_repo import JSONRepo
 from cry_baby.app.core.ports import Repository
 from cry_baby.app.core.service import CryBabyService
 from cry_baby.pkg.audio_file_client.adapters.librosa_client import LibrosaClient
@@ -37,9 +37,14 @@ def run_continously(
     recorder: PyaudioRecorder,
     classifier,
     repository: Repository,
+    audio_file_client: LibrosaClient,
 ):
     service = CryBabyService(
-        logger=logger, classifier=classifier, recorder=recorder, repository=repository
+        logger=logger,
+        classifier=classifier,
+        recorder=recorder,
+        repository=repository,
+        audio_file_client=audio_file_client,
     )
     logger.info("Starting to continously evaluate from microphone")
     while not SHUTDOWN_EVENT.is_set():
@@ -57,7 +62,7 @@ def run_continously(
 
 def main():
     logger = ColorfulCLILogger()
-    temp_path = pathlib.Path("/tmp")
+    save_audio_dir = pathlib.Path(os.getenv("SAVE_AUDIO_DIR", "/tmp"))
     settings = PyaudioRecordingSettings(
         audio_file_format=pyaudio.paInt16,
         number_of_audio_signals=1,
@@ -65,8 +70,10 @@ def main():
         recording_rate_hz=44100,
         duration_seconds=4,
     )
-    recorder = PyaudioRecorder(logger=logger, temp_path=temp_path, settings=settings)
-    repository = CSVRepo(csv_file_path=pathlib.Path("predictions.csv"))
+    recorder = PyaudioRecorder(
+        logger=logger, temp_path=save_audio_dir, settings=settings
+    )
+    repository = JSONRepo(json_file_path=pathlib.Path("cry_baby.json"))
 
     librosa_audio_file_client = LibrosaClient()
 
@@ -109,7 +116,7 @@ def main():
         logger.error("No compatible TensorFlow or TensorFlow Lite installation found.")
         return
 
-    run_continously(logger, recorder, classifier, repository)
+    run_continously(logger, recorder, classifier, repository, librosa_audio_file_client)
 
 
 if __name__ == "__main__":

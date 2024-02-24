@@ -191,3 +191,5 @@ class PyaudioRecorder(ports.Recorder):
         waveFile.close()
 
         self.logger.debug("Written to file", file_path=file_path)
+
+    import librosa

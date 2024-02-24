@@ -1,3 +1,4 @@
+import pathlib
 import queue
 import threading
 from typing import Optional
@@ -5,6 +6,7 @@ from typing import Optional
 import hexalog.ports
 
 from cry_baby.app.core import ports
+from cry_baby.pkg.audio_file_client.core.ports import AudioFileClient
 
 
 class CryBabyService(ports.Service):
@@ -14,11 +16,13 @@ class CryBabyService(ports.Service):
         classifier: ports.Classifier,
         recorder: ports.Recorder,
         repository: ports.Repository,
+        audio_file_client: AudioFileClient,
     ):
         self.logger = logger
         self.classifier = classifier
         self.recorder = recorder
         self.repository = repository
+        self.audio_file_client = audio_file_client
 
     def evaluate_from_microphone(
         self,
@@ -48,7 +52,16 @@ class CryBabyService(ports.Service):
         self, file_written_queue: queue.Queue, classifier: ports.Classifier
     ):
         while True:
-            file_path = file_written_queue.get()
+            file_path: pathlib.Path = file_written_queue.get()
+            # TODO: Sampling rate, and threshold DB, should not be hardcoded
+            if not self.audio_file_client.check_audio_loudness(
+                file_path, threshold_db=48, sampling_rate_hz=16000
+            ):
+                self.logger.debug(
+                    "File not loud enough, removing", audio_file_path=file_path
+                )
+                file_path.unlink()
+                continue
             self.logger.debug(f"File written: {file_path}")
             prediction = classifier.classify(file_path)
             self.logger.debug(f"Prediction: {prediction}")

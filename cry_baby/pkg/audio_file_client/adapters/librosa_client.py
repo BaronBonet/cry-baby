@@ -1,4 +1,5 @@
 import pathlib
+from typing import Optional
 
 import librosa
 import numpy as np
@@ -125,11 +126,24 @@ class LibrosaClient(ports.AudioFileClient):
             # If the audio is already longer than the specified duration, return the original path
             return path
 
+    def check_audio_loudness(
+        self, file_path: pathlib.Path, threshold_db: float, sampling_rate_hz: int
+    ) -> bool:
+        """
+        Check if the audio file's loudness exceeds a given threshold in decibels.
+        """
+        y, _ = self._load(file_path, sampling_rate_hz=sampling_rate_hz)
+        rms_amplitude = librosa.feature.rms(y=y)[0]
+        rms_db = librosa.amplitude_to_db(rms_amplitude, ref=0.00002)
+        return any(rms_db > threshold_db)
+
     @staticmethod
-    def _load(path: pathlib.Path, sampling_rate_hz: int) -> tuple[np.ndarray, float]:
+    def _load(
+        path: pathlib.Path, sampling_rate_hz: Optional[int]
+    ) -> tuple[np.ndarray, float]:
         """
         Load the audio file using librosa.
-        if it is not contained in our local in memory cache.
+        If it is not contained in our local in memory cache.
         """
         cache = LibrosaClient.cached_files.get(path)
         if cache:

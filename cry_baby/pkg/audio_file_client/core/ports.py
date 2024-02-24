@@ -39,3 +39,11 @@ class AudioFileClient(ABC):
         """
         Extract the mel spectrogram
         """
+
+    @abstractmethod
+    def check_audio_loudness(
+        self, file_path: pathlib.Path, threshold_db: float, sampling_rate_hz: int
+    ) -> bool:
+        """
+        Check if the audio file's loudness exceeds a given threshold in decibels.
+        """
